@@ -4,39 +4,36 @@
 //     { id: 3, name: "css", parentId: 1 }
 // ];
 
-let folderSystem2 = [];
 let inputName = document.getElementById("inputName");
 const btn = document.querySelector(".add");
 let display = document.getElementById('display');
 btn.addEventListener("click", addItem);
 
-let folderSystem = JSON.parse(localStorage.getItem('folderSystem')) || [];
 let listElement = document.getElementById('myList');
+let folders = JSON.parse(localStorage.getItem('folderSystem')) || [];
 
 function displayListItems() {
     listElement.innerHTML = '';
-    folderSystem.forEach(folder => {
-        const li = document.createElement('li');
-        li.innerHTML = `<i class="fa-solid fa-folder-open"></i> ${folder} 
-        <span class="icons"><i class="fa-solid fa-folder-plus" onclick="addSubFolder()"></i>
-        <i class="fa-solid fa-pen-to-square"></i>
-        <i class="fa-solid fa-trash"></i> </span>`;
+    folders.forEach(folder => {
+        let li = document.createElement('li');
+        li.innerHTML = `<i class="fa-solid fa-folder-open" onclick="addNewFolder(${folder.id})"></i> ${folder.name} 
+        <span class="icons"><i class="fa-solid fa-folder-plus" onclick="createNewFolder(${folder.id})"></i>
+        <i class="fa-solid fa-pen-to-square" onclick="editFolder(${folder.id})"></i>
+        <i class="fa-solid fa-trash" onclick="deleteFolder(${folder.id})"></i> </span>`;
+        li.setAttribute("data-id", folder.id);
         listElement.appendChild(li);
     });
 }
-
 function addItem() {
-    let input = document.getElementById("inputName");
-    const newItem = input.value.trim();
-
-    if (newItem) {
-        folderSystem.push(newItem);
-        saveListItems(folderSystem);
+    const folderName = inputName.value.trim();
+    if (folderName !== "") {
+        saveListItems(folders);
         displayListItems();
-        input.value = '';
+        inputName.value = '';
     }
-    createFolder(newItem);
+    createFolder(folderName);
 }
+
 function saveListItems(folder) {
     localStorage.setItem('folderSystem', JSON.stringify(folder));
 }
@@ -44,30 +41,56 @@ function saveListItems(folder) {
 function loadData() {
     const stored = localStorage.getItem('folders');
     if (stored) {
-        folderSystem2 = JSON.parse(stored);
+        folders = JSON.parse(stored);
     }
 }
 
-function createFolder(newItem) {
-    const folderName = newItem;
-    const newFolder = {
+function createFolder(folderName) {
+    folders = JSON.parse(localStorage.getItem('folderSystem')) || [];
+    let newFolder = {
         id: Date.now(),
         name: folderName,
         parentId: null
-    }
-    let folders = JSON.parse(localStorage.getItem('folderSystem2')) || [];
+    };
     folders.push(newFolder);
-    localStorage.setItem('folderSystem2', JSON.stringify(folders));
+    localStorage.setItem('folderSystem', JSON.stringify(folders));
+    displayListItems();
     loadData();
 }
+
+
+function deleteFolder(folderIdDelete) {
+    const elem = document.querySelector(`li[data-id="${folderIdDelete}"]`);
+    const storedFolders = localStorage.getItem("folderSystem");
+    if (storedFolders) {
+        let objects = JSON.parse(storedFolders);
+        const foundObject = objects.filter((obj) => obj.id !== folderIdDelete);
+        localStorage.setItem('folderSystem', JSON.stringify(foundObject));
+    }
+    if (elem) {
+        elem.remove();
+    }
+}
+
+// function addNewFolder(folderId) {
+//     console.log("Using folder ID:", folderId);
+// }
+
+function editFolder(folderIdUpdate) {
+    const storedFolders = localStorage.getItem("folderSystem");
+    if (storedFolders) {
+        let objects = JSON.parse(storedFolders);
+        const foundObject = objects.find((obj) => obj.id === folderIdUpdate);
+        if (foundObject) {
+            let editVal = prompt("Update the Folder Name", foundObject.name);
+            console.log(editVal);
+            if (editVal != null && editVal !== "") {
+                foundObject.name = editVal;
+                console.log(foundObject);
+            }
+        }
+        localStorage.setItem('folderSystem', JSON.stringify(foundObject));
+    }
+}
+
 window.onload = displayListItems;
-
-let folders = JSON.parse(localStorage.getItem('folderSystem2')) || [];
-let id = [];
-for(let i = 0; i < folders.length; i++){
-    
-}
-function addSubFolder(id) {
-    console.log(id);
-}
-
