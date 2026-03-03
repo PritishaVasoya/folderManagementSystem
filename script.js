@@ -8,14 +8,14 @@ localStorage.setItem('folderSystem', JSON.stringify(folders));
 
 //Show folders In Tree View Structure
 function showWithHierarchy() {
-    const folders = JSON.parse(localStorage.getItem('folderSystem')) || [];
+    let folders = JSON.parse(localStorage.getItem("folderSystem"));
     const appContainer = document.getElementById('display');
     appContainer.innerHTML = '';
     displayListItems(folders, null, appContainer);
 }
 
 //Display New Folders
-function displayListItems(folders, parentid, container) {
+function displayListItems(folders, parentid = null, container) {
     let children = folders.filter(item => item.parentId === parentid);
     if (children.length === 0) return;
 
@@ -27,22 +27,23 @@ function displayListItems(folders, parentid, container) {
         <i class="fa-solid fa-pen-to-square" onclick="editFolder(${folder.id})"></i>
         <i class="fa-solid fa-trash" onclick="deleteFolder(${folder.id})"></i> </span>`;
         li.setAttribute("data-id", folder.id);
-        displayListItems(folders, folder.id, li);
         ul.appendChild(li);
+        displayListItems(folders, folder.id, li);
     });
     container.appendChild(ul);
 }
 
 //Add New Folders
-function addItem() {
-    const folderName = inputName.value.trim();
-    if (inputName.value.trim() === '') {
+function addItem(event) {
+    event.preventDefault();
+    let folderName = inputName.value.trim();
+    if (folderName === '') {
         alert("Please enter a value in input field.");
     } else {
         showWithHierarchy();
         inputName.value = '';
+        createFolder(folderName);
     }
-    createFolder(folderName);
 }
 
 //Create new folders
@@ -59,7 +60,6 @@ function createFolder(folderName, parentFolderId) {
     } else {
         newFolder.parentId = null
     }
-
     folders.push(newFolder);
     localStorage.setItem('folderSystem', JSON.stringify(folders));
     showWithHierarchy();
@@ -97,7 +97,7 @@ function editFolder(folderIdUpdate) {
     let elem = document.querySelector(`li[data-id="${folderIdUpdate}"]`);
     const storedFolders = localStorage.getItem("folderSystem");
     let objects = storedFolders ? JSON.parse(storedFolders) : [];
-    
+
     const foundObject = objects.find((obj) => obj.id === folderIdUpdate);
     if (foundObject) {
         let editVal = prompt("Update the Folder Name", foundObject.name);
