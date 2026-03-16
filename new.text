@@ -1,0 +1,98 @@
+app.js
+import React, { useState } from "react";
+import Folder from "./Folder";
+
+function App() {
+
+  const [folders, setFolders] = useState([
+    { id: 1, name: "Root", parentId: null }
+  ]);
+
+  const createFolder = (name, parentId) => {
+
+    const newFolder = {
+      id: Date.now(),
+      name: name,
+      parentId: parentId
+    };
+
+    const updatedFolders = [...folders, newFolder];
+
+    setFolders(updatedFolders);
+    localStorage.setItem("folderSystem", JSON.stringify(updatedFolders));
+  };
+
+  const addSubFolder = (folderIdNew) => {
+
+    const foundObject = folders.find(
+      (obj) => obj.id === folderIdNew
+    );
+
+    if (foundObject) {
+
+      let subFolder = prompt("Add the Sub Folder");
+
+      if (subFolder && subFolder.trim() !== "") {
+
+        const parentId = foundObject.id;
+
+        createFolder(subFolder, parentId);
+
+      }
+    }
+  };
+
+  return (
+    <div>
+      <h2>Folder System</h2>
+
+      <Folder
+        folders={folders}
+        parentId={null}
+        addSubFolder={addSubFolder}
+      />
+    </div>
+  );
+}
+
+export default App;
+
+<Folder
+  folders={folders}
+  parentId={null}
+  addSubFolder={addSubFolder}
+/>
+
+
+folder.js
+
+function Folder({ folders, parentId, addSubFolder }) {
+
+  const childFolders = folders.filter(
+    (folder) => folder.parentId === parentId
+  );
+
+  return (
+    <div style={{ marginLeft: "20px" }}>
+      {childFolders.map((folder) => (
+        <div key={folder.id}>
+
+          📁 {folder.name}
+
+          <button onClick={() => addSubFolder(folder.id)}>
+            Add SubFolder
+          </button>
+
+          <Folder
+            folders={folders}
+            parentId={folder.id}
+            addSubFolder={addSubFolder}
+          />
+
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default Folder;
